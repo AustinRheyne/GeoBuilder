@@ -9,14 +9,21 @@
 * @version  1.0, 1/11/2023
 * */
 
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Main {
+
+    static Shape shape;
+    static File ASTEROID_LOCATION = new File("./SavedAsteroids");
     public static void main(String[] args) {
         boolean altKey;
         boolean mouseDown = false;
         // Set the configurations of the canvas
-        Shape shape = new Shape();
+        shape = new Shape();
         StdDraw.setScale(0, 100);
         StdDraw.enableDoubleBuffering();
 
@@ -37,8 +44,9 @@ public class Main {
             }
 
             if (StdDraw.isMousePressed()) {
-                if (altKey && !mouseDown && dragPoint == null) { // Ensure that a user cannot drag a point and place a new one down
-                                                                 // at the same time
+                if (altKey && !mouseDown && dragPoint == null) { // Alt key, Mouse is not down, and the dragPoint does not exist
+                    // Ensure that a user cannot drag a point and place a new one down
+                    // at the same time
                     mouseDown = true;
                     // Adjust the point to the correct position, then create a new point
                     Line currentLine = shadowPoint.lines.get(0);
@@ -46,20 +54,17 @@ public class Main {
                     currentLine.getStart().addLineConnection(shape.newLine(currentLine.getStart(), newPoint));
                     currentLine.getEnd().addLineConnection(shape.newLine(newPoint, currentLine.getEnd()));
                     shape.removeLine(currentLine);
+                } else if(dragPoint != null) {
+                    dragPoint.setX(StdDraw.mouseX());
+                    dragPoint.setY(StdDraw.mouseY());
+                    dragPoint.updateLines();
                 } else {
-                    if(dragPoint != null) {
+                    Point clicked = shape.findClickedPoint(StdDraw.mouseX(), StdDraw.mouseY());
+                    if (clicked.getX() != -100) {
+                        dragPoint = clicked;
                         dragPoint.setX(StdDraw.mouseX());
                         dragPoint.setY(StdDraw.mouseY());
                         dragPoint.updateLines();
-                    }
-                    else {
-                        Point clicked = shape.findClickedPoint(StdDraw.mouseX(), StdDraw.mouseY());
-                        if (clicked.getX() != -100) {
-                            dragPoint = clicked;
-                            dragPoint.setX(StdDraw.mouseX());
-                            dragPoint.setY(StdDraw.mouseY());
-                            dragPoint.updateLines();
-                        }
                     }
                 }
             } else {
@@ -73,6 +78,18 @@ public class Main {
             shape.draw();
             StdDraw.show();
         }
+    }
+
+    public static void SaveCurrentAsteroid (ActionEvent e) throws IOException {
+        StringBuilder output = new StringBuilder();
+        for(Point p : shape.getPoints()) {
+            output.append(p.getPosition() + ",");
+        }
+        output.deleteCharAt(output.length()-1);
+        FileWriter asteroidFile = new FileWriter(ASTEROID_LOCATION.getName() + "/Asteroid" + ASTEROID_LOCATION.list().length + ".ast");
+        asteroidFile.write(output.toString());
+        asteroidFile.close();
+        System.out.println("Successfully saved the Asteroid as a file");
     }
 
 

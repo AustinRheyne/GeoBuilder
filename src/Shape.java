@@ -6,9 +6,13 @@ public class Shape {
     ArrayList<Line> lines = new ArrayList<Line>();
 
     public Shape(){
-        newPoint(25, 50);
-        newPoint(75, 50);
+        newPoint(25, 25);
+        newPoint(75, 25);
+        newPoint(50, 60);
         newLine(points.get(0), points.get(1));
+        newLine(points.get(1), points.get(2));
+        newLine(points.get(2), points.get(0));
+
     }
 
     public Point newPoint(double x, double y) {
@@ -106,4 +110,6 @@ public class Shape {
         line.getEnd().removeLineConnection(line);
         lines.remove(line);
     }
+
+
 }
